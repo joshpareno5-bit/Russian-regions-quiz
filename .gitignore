@@ -1,0 +1,18 @@
+# Fichiers de cache et compilés de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Dossiers d'environnement virtuel
+venv/
+env/
+.venv/
+.env
+
+# Fichiers de configuration IDE
+.idea/
+.vscode/
+
+# Fichiers système
+.DS_Store
