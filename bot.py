@@ -132,7 +132,7 @@ def get_main_menu_keyboard():
         [InlineKeyboardButton("🎯 Режим 'Вызов' (10 вопросов)", callback_data='mode_challenge')],
         [InlineKeyboardButton("🏃‍♀️ Режим 'Марафон' (89 вопросов)", callback_data='mode_marathon')],
         [InlineKeyboardButton("☠️ Режим 'Выживание'", callback_data='mode_survival')],
-        [InlineKeyboardButton("📚 Режим 'Справочник'", callback_data='mode_discovery')],
+        [InlineKeyboardButton("📚 'Справочник'", callback_data='mode_discovery')],
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -388,7 +388,7 @@ async def discovery_search(update: Update, context: CallbackContext) -> int:
     
     return DISCOVERY_MODE
 
-# --- Serveur web minimal ---
+""" # --- Serveur web minimal ---
 def run_webserver():
     app = Flask(__name__)
 
@@ -397,13 +397,12 @@ def run_webserver():
         return "Bot is running!"
 
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port) """
+
+import os
 
 # --- Fonction principale ---
 def main() -> None:
-    # Lancer le serveur web dans un thread séparé pour satisfaire Render
-    threading.Thread(target=run_webserver, daemon=True).start()
-    
     application = Application.builder().token(TELEGRAM_API_KEY).build()
 
     conv_handler = ConversationHandler(
@@ -432,8 +431,28 @@ def main() -> None:
 
     application.add_handler(conv_handler)
 
-    logger.info("Бот запускается...")
-    application.run_polling()
+    # Configuration pour Render
+    PORT = int(os.environ.get("PORT", 8443))
+    RENDER_EXTERNAL_URL = os.environ.get("RENDER_EXTERNAL_URL")  # URL de votre app Render
+    
+    if not RENDER_EXTERNAL_URL:
+        logger.error("RENDER_EXTERNAL_URL n'est pas défini !")
+        return
+
+    logger.info(f"Bot démarre avec webhook sur {RENDER_EXTERNAL_URL}")
+    
+    # Démarrer avec webhook
+    application.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path="webhook",
+        webhook_url=f"{RENDER_EXTERNAL_URL}/webhook"
+    )
 
 if __name__ == '__main__':
     main()
+
+async def check_webhook(application: Application):
+    webhook_info = await application.bot.get_webhook_info()
+    logger.info(f"Webhook URL: {webhook_info.url}")
+    logger.info(f"Pending updates: {webhook_info.pending_update_count}")
