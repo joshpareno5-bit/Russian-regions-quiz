@@ -11,7 +11,6 @@ import os
 import asyncio
 import threading
 
-from flask import Flask
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     Application,
